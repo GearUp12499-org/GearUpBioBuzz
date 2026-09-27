@@ -183,6 +183,7 @@ public class SimpleApriltagClusterTest extends LinearOpMode {
                                 "Webcam 1"
                         )
                 )
+                .enableLiveView(true)
                 .addProcessor(aprilTag)
                 .build();
     }

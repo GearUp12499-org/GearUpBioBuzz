@@ -157,5 +157,16 @@
     </Camera> -->
 
     <!-- ======================================================================================= -->
+    <Camera vid="0x32E4" pid="0x0234">
 
+        <Calibration
+
+            size="640 480"
+            focalLength="239.2408f, 239.2408f"
+            principalPoint="299.8581f, 232.5749f"
+            distortionCoefficients="0.0100759f, -0.03f, 0.00024, -0.0000143f, 0.005f, 0f, 0f 0f"
+
+        />
+
+    </Camera>
 </Calibrations>
