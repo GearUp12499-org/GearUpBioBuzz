@@ -131,7 +131,7 @@ public class SimpleApriltagClusterTest extends LinearOpMode {
                             "%.1f in",
                             cluster.ftcPose.range
                     );
-                    //bearing abngle
+                    //bearing angle
                     telemetry.addData(
                             "Bearing",
                             "%.1f deg",
@@ -139,9 +139,21 @@ public class SimpleApriltagClusterTest extends LinearOpMode {
                     );
 
                     telemetry.addData(
+                            "Pitch",
+                            "%.1f deg",
+                            cluster.ftcPose.pitch
+                    );
+
+                    telemetry.addData(
                             "Yaw",
                             "%.1f deg",
                             cluster.ftcPose.yaw
+                    );
+
+                    telemetry.addData(
+                            "Roll",
+                            "%.1f deg",
+                            cluster.ftcPose.roll
                     );
                 }
             }
