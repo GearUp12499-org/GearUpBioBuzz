@@ -135,8 +135,8 @@ public class SimpleApriltagClusterTest extends LinearOpMode {
                     B = CameraAngle - A;
                     H = Math.hypot(cluster.ftcPose.z, cluster.ftcPose.y);
 
-                    f = Math.cos(B) * H;
-                    up = Math.tan(B) * f;
+                    f = Math.cos(B)  *  H;
+                    up = Math.tan(B)  *  f;
 
                     telemetry.addData(
                             "A,B,H",
