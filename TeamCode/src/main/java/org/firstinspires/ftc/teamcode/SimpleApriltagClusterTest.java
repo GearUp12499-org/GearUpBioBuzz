@@ -6,6 +6,8 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.GainControl;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagClusterDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
@@ -13,12 +15,15 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import org.firstinspires.ftc.vision.apriltag.AprilTagSingleDetection;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @TeleOp(name = "AprilTag Cluster Test", group = "Test")
 public class SimpleApriltagClusterTest extends LinearOpMode {
     //this is 90% the ConceptAprilTag sample code
     private AprilTagProcessor aprilTag;
     private VisionPortal visionPortal;
+    private int TEST_EXPOSURE = 10;   // Change this to test exposure speeds
+    private int TEST_GAIN = 20;       // Change this to test image brightness
 
     @Override
     public void runOpMode() {
@@ -26,6 +31,25 @@ public class SimpleApriltagClusterTest extends LinearOpMode {
         initAprilTag();
 
         telemetry.addLine("Camera initialized");
+        telemetry.update();
+        while (!isStopRequested() && visionPortal.getCameraState() != VisionPortal.CameraState.STREAMING) {
+            sleep(20);
+        }
+
+//makes the camera use our set values
+        ExposureControl exposureControl = visionPortal.getCameraControl(ExposureControl.class);
+        if (exposureControl != null) {
+            exposureControl.setMode(ExposureControl.Mode.Manual);
+            exposureControl.setExposure(TEST_EXPOSURE, TimeUnit.MILLISECONDS);
+        }
+
+        GainControl gainControl = visionPortal.getCameraControl(GainControl.class);
+        if (gainControl != null) {
+            gainControl.setGain(TEST_GAIN);
+        }
+
+        //let us know when it is ready
+        telemetry.addData("", "Values applied");
         telemetry.update();
 
         waitForStart();

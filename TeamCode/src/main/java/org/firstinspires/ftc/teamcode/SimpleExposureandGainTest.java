@@ -13,7 +13,7 @@ public class SimpleExposureandGainTest extends LinearOpMode {
 
 
     private int TEST_EXPOSURE = 10;   // Change this to test exposure speeds
-    private int TEST_GAIN = 15;       // Change this to test image brightness
+    private int TEST_GAIN = 20;       // Change this to test image brightness
 
     private VisionPortal visionPortal;
 
