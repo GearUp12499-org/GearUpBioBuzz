@@ -62,6 +62,9 @@ public class SimpleApriltagClusterTest extends LinearOpMode {
 
             int singleCount = 0;
             int clusterCount = 0;
+            double f = 0;
+            double CameraAngle = 68.9;
+            double up = 0;
 
             for (AprilTagDetection detection : detections) {
                 //is it only one tag or what
@@ -125,6 +128,13 @@ public class SimpleApriltagClusterTest extends LinearOpMode {
                     AprilTagClusterDetection cluster =
                             (AprilTagClusterDetection) detection;
 
+                    f = Math.cos((CameraAngle - Math.atan2(cluster.ftcPose.y, cluster.ftcPose.z)) * Math.hypot(cluster.ftcPose.z, cluster.ftcPose.y));
+                    up = Math.tan(CameraAngle - Math.atan2(cluster.ftcPose.y, cluster.ftcPose.z)) * f;
+
+
+
+
+
                     telemetry.addLine();
                     telemetry.addLine("CLUSTER");
                     //metadata is the SDKs stored info about the cluster
@@ -151,6 +161,19 @@ public class SimpleApriltagClusterTest extends LinearOpMode {
                             cluster.ftcPose.y,
                             cluster.ftcPose.z
                     );
+
+                    telemetry.addData(
+                         "Forward Distance",
+                         "%.1f in",
+                            f
+                    );
+
+                    telemetry.addData(
+                            "Upward Distance",
+                            "%.1f in",
+                            up
+                    );
+
                     //distance from camera to cluster
                     telemetry.addData(
                             "Range",
