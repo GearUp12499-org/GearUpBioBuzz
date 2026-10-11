@@ -63,8 +63,11 @@ public class SimpleApriltagClusterTest extends LinearOpMode {
             int singleCount = 0;
             int clusterCount = 0;
             double f = 0;
-            double CameraAngle = 68.9;
+            double CameraAngle = 1.203;
             double up = 0;
+            double B = 0;
+            double H = 0;
+            double A = 0;
 
             for (AprilTagDetection detection : detections) {
                 //is it only one tag or what
@@ -128,8 +131,18 @@ public class SimpleApriltagClusterTest extends LinearOpMode {
                     AprilTagClusterDetection cluster =
                             (AprilTagClusterDetection) detection;
 
-                    f = Math.cos((CameraAngle - Math.atan2(cluster.ftcPose.y, cluster.ftcPose.z)) * Math.hypot(cluster.ftcPose.z, cluster.ftcPose.y));
-                    up = Math.tan(CameraAngle - Math.atan2(cluster.ftcPose.y, cluster.ftcPose.z)) * f;
+                    A = Math.atan2(cluster.ftcPose.z, cluster.ftcPose.y);
+                    B = CameraAngle - A;
+                    H = Math.hypot(cluster.ftcPose.z, cluster.ftcPose.y);
+
+                    f = Math.cos(B) * H;
+                    up = Math.tan(B) * f;
+
+                    telemetry.addData(
+                            "A,B,H",
+                            "%8.2f %8.2f %8.2f",
+                            A, B, H
+                    );
 
 
 
@@ -211,6 +224,7 @@ public class SimpleApriltagClusterTest extends LinearOpMode {
             telemetry.addData("Single Tags", singleCount);
             telemetry.addData("Clusters", clusterCount);
 
+
             telemetry.addLine();
             telemetry.addLine("dpad down tp stop camera");
             telemetry.addLine("dpad up to resume camera");
@@ -234,12 +248,13 @@ public class SimpleApriltagClusterTest extends LinearOpMode {
     private void initAprilTag() {
         //create the april tag processor
         aprilTag = new AprilTagProcessor.Builder()
+                .setLensIntrinsics(358.215, 358.215, 449.09, 352.672)
                 .build();
         //start camera
         //idk if there is a hardware thing already so it is just here
         visionPortal = new VisionPortal.Builder()
                 .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
-                .setCameraResolution(new Size(1280, 720))
+                .setCameraResolution(new Size(960, 720))
                 .enableLiveView(true)
                 .addProcessor(aprilTag)
                 .build();
