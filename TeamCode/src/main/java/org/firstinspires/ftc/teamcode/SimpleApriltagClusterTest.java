@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import android.util.Size;
+
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -189,12 +191,8 @@ public class SimpleApriltagClusterTest extends LinearOpMode {
         //start camera
         //idk if there is a hardware thing already so it is just here
         visionPortal = new VisionPortal.Builder()
-                .setCamera(
-                        hardwareMap.get(
-                                WebcamName.class,
-                                "Webcam 1"
-                        )
-                )
+                .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
+                .setCameraResolution(new Size(1280, 720))
                 .enableLiveView(true)
                 .addProcessor(aprilTag)
                 .build();
