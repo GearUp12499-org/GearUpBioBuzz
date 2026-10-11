@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import android.util.Size;
+
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -14,7 +16,7 @@ import java.util.List;
 
 @TeleOp(name = "AprilTag Cluster Test", group = "Test")
 public class SimpleApriltagClusterTest extends LinearOpMode {
-//this is 90% the ConceptAprilTag sample code
+    //this is 90% the ConceptAprilTag sample code
     private AprilTagProcessor aprilTag;
     private VisionPortal visionPortal;
 
@@ -90,7 +92,7 @@ public class SimpleApriltagClusterTest extends LinearOpMode {
                                 single.center.y
                         );
                     }
-                // is it a cluster
+                    // is it a cluster
                     //the opmode sample reports percentClusterFound
                 } else if (detection instanceof AprilTagClusterDetection) {
 
@@ -181,7 +183,7 @@ public class SimpleApriltagClusterTest extends LinearOpMode {
 
         visionPortal.close();
     }
-//set up the cameras
+    //set up the cameras
     private void initAprilTag() {
         //create the april tag processor
         aprilTag = new AprilTagProcessor.Builder()
@@ -189,12 +191,8 @@ public class SimpleApriltagClusterTest extends LinearOpMode {
         //start camera
         //idk if there is a hardware thing already so it is just here
         visionPortal = new VisionPortal.Builder()
-                .setCamera(
-                        hardwareMap.get(
-                                WebcamName.class,
-                                "Webcam 1"
-                        )
-                )
+                .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
+                .setCameraResolution(new Size(1280, 720))
                 .enableLiveView(true)
                 .addProcessor(aprilTag)
                 .build();
