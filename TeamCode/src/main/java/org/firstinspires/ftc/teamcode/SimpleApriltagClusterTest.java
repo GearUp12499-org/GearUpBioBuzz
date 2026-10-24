@@ -19,239 +19,392 @@ import java.util.concurrent.TimeUnit;
 
 @TeleOp(name = "AprilTag Cluster Test", group = "Test")
 public class SimpleApriltagClusterTest extends LinearOpMode {
-    //this is 90% the ConceptAprilTag sample code
     private AprilTagProcessor aprilTag;
     private VisionPortal visionPortal;
-    private int TEST_EXPOSURE = 10;   // Change this to test exposure speeds
-    private int TEST_GAIN = 20;       // Change this to test image brightness
+
+    private int TEST_EXPOSURE = 10;
+    private int TEST_GAIN = 20;
+
+    private boolean previousY = false;
+    private boolean previousA = false;
+    private boolean previousB = false;
+    private boolean previousX = false;
+    private boolean previousDown = false;
+    private boolean previousUp = false;
 
     @Override
     public void runOpMode() {
-
         initAprilTag();
 
-        telemetry.addLine("Camera initialized");
-        telemetry.update();
-        while (!isStopRequested() && visionPortal.getCameraState() != VisionPortal.CameraState.STREAMING) {
-            sleep(20);
-        }
+        try {
+            telemetry.addLine("Waiting for camera");
+            telemetry.update();
 
-//makes the camera use our set values
-        ExposureControl exposureControl = visionPortal.getCameraControl(ExposureControl.class);
-        if (exposureControl != null) {
-            exposureControl.setMode(ExposureControl.Mode.Manual);
-            exposureControl.setExposure(TEST_EXPOSURE, TimeUnit.MILLISECONDS);
-        }
+            while (!isStopRequested()
+                    && visionPortal.getCameraState()
+                    != VisionPortal.CameraState.STREAMING) {
+                if (visionPortal.getCameraState()
+                        == VisionPortal.CameraState.ERROR) {
+                    telemetry.addLine("Camera error");
+                    telemetry.update();
+                    return;
+                }
 
-        GainControl gainControl = visionPortal.getCameraControl(GainControl.class);
-        if (gainControl != null) {
-            gainControl.setGain(TEST_GAIN);
-        }
+                sleep(20);
+            }
 
-        //let us know when it is ready
-        telemetry.addData("", "Values applied");
-        telemetry.update();
+            if (isStopRequested()) {
+                return;
+            }
 
-        waitForStart();
+            ExposureControl exposureControl =
+                    visionPortal.getCameraControl(ExposureControl.class);
 
-        while (opModeIsActive()) {
-//list all the apriltags it detects
-            List<AprilTagDetection> detections = aprilTag.getDetections();
+            boolean exposureReady = false;
+            long minExposure = 1;
+            long maxExposure = 1;
 
-            telemetry.addData("Total detections", detections.size());
+            if (exposureControl != null
+                    && exposureControl.isExposureSupported()
+                    && exposureControl.isModeSupported(ExposureControl.Mode.Manual)) {
+                exposureReady =
+                        exposureControl.setMode(ExposureControl.Mode.Manual);
 
-            int singleCount = 0;
-            int clusterCount = 0;
-            double f = 0;
-            double CameraAngle = 1.203;
-            double up = 0;
-            double B = 0;
-            double H = 0;
-            double A = 0;
+                if (exposureReady) {
+                    sleep(50);
 
-            for (AprilTagDetection detection : detections) {
-                //is it only one tag or what
-                if (detection instanceof AprilTagSingleDetection) {
+                    minExposure = Math.max(
+                            1,
+                            (long) Math.ceil(
+                                    exposureControl.getMinExposure(TimeUnit.MICROSECONDS)
+                                            / 1000.0
+                            )
+                    );
 
-                    singleCount++;
+                    maxExposure =
+                            exposureControl.getMaxExposure(TimeUnit.MILLISECONDS);
 
-                    AprilTagSingleDetection single =
-                            (AprilTagSingleDetection) detection;
+                    exposureReady = maxExposure >= minExposure;
 
-                    telemetry.addLine();
-                    telemetry.addLine("only one tag...");
-                    telemetry.addData("ID", single.id);
-
-                    if (single.metadata != null) {
-                        telemetry.addData("Name", single.metadata.name);
-
-                        telemetry.addData(
-                                "Position (X,Y,Z)",
-                                "%.1f , %.1f , %.1f in",
-                                single.ftcPose.x,
-                                single.ftcPose.y,
-                                single.ftcPose.z
+                    if (exposureReady) {
+                        TEST_EXPOSURE = (int) Math.max(
+                                minExposure,
+                                Math.min(maxExposure, TEST_EXPOSURE)
                         );
 
-                        telemetry.addData(
-                                "Range",
-                                "%.1f in",
-                                single.ftcPose.range
-                        );
-
-                        telemetry.addData(
-                                "Bearing",
-                                "%.1f deg",
-                                single.ftcPose.bearing
-                        );
-
-                        telemetry.addData(
-                                "Yaw",
-                                "%.1f deg",
-                                single.ftcPose.yaw
-                        );
-
-                    } else {
-
-                        telemetry.addData("Name", "Idk this tag");
-
-                        telemetry.addData(
-                                "Center",
-                                "%.0f / %.0f px",
-                                single.center.x,
-                                single.center.y
-                        );
+                        if (!exposureControl.setExposure(
+                                TEST_EXPOSURE,
+                                TimeUnit.MILLISECONDS
+                        )) {
+                            telemetry.addLine("Camera rejected initial exposure");
+                        }
                     }
-                    // is it a cluster
-                    //the opmode sample reports percentClusterFound
-                } else if (detection instanceof AprilTagClusterDetection) {
-
-                    clusterCount++;
-
-                    AprilTagClusterDetection cluster =
-                            (AprilTagClusterDetection) detection;
-
-                    A = Math.atan2(cluster.ftcPose.z, cluster.ftcPose.y);
-                    B = CameraAngle - A;
-                    H = Math.hypot(cluster.ftcPose.z, cluster.ftcPose.y);
-
-                    f = Math.cos(B)  *  H;
-                    up = Math.tan(B)  *  f;
-
-                    telemetry.addData(
-                            "A,B,H",
-                            "%8.2f %8.2f %8.2f",
-                            A, B, H
-                    );
-
-
-
-
-
-                    telemetry.addLine();
-                    telemetry.addLine("CLUSTER");
-                    //metadata is the SDKs stored info about the cluster
-                    // so it checks if the SDK knowd anything about this cluster first
-                    //if metadata is null the opmode will crash :,( so we put a name
-                    if (cluster.metadata != null) {
-                        telemetry.addData(
-                                "Cluster",
-                                cluster.metadata.name
-                        );
-                    }
-                    //how much of the cluster did we find
-                    //part of the sdk
-                    telemetry.addData(
-                            "Tags Found",
-                            "%d%%",
-                            cluster.percentClusterFound
-                    );
-                    //3d cluster position
-                    telemetry.addData(
-                            "Position (X,Y,Z)",
-                            "%.1f , %.1f , %.1f in",
-                            cluster.ftcPose.x,
-                            cluster.ftcPose.y,
-                            cluster.ftcPose.z
-                    );
-
-                    telemetry.addData(
-                         "Forward Distance",
-                         "%.1f in",
-                            f
-                    );
-
-                    telemetry.addData(
-                            "Upward Distance",
-                            "%.1f in",
-                            up
-                    );
-
-                    //distance from camera to cluster
-                    telemetry.addData(
-                            "Range",
-                            "%.1f in",
-                            cluster.ftcPose.range
-                    );
-                    //bearing angle
-                    telemetry.addData(
-                            "Bearing",
-                            "%.1f deg",
-                            cluster.ftcPose.bearing
-                    );
-
-                    telemetry.addData(
-                            "Pitch",
-                            "%.1f deg",
-                            cluster.ftcPose.pitch
-                    );
-
-                    telemetry.addData(
-                            "Yaw",
-                            "%.1f deg",
-                            cluster.ftcPose.yaw
-                    );
-
-                    telemetry.addData(
-                            "Roll",
-                            "%.1f deg",
-                            cluster.ftcPose.roll
-                    );
                 }
             }
 
-            telemetry.addLine();
-            telemetry.addData("Single Tags", singleCount);
-            telemetry.addData("Clusters", clusterCount);
+            GainControl gainControl =
+                    visionPortal.getCameraControl(GainControl.class);
 
+            int minGain = 0;
+            int maxGain = 0;
+            boolean gainReady = false;
 
-            telemetry.addLine();
-            telemetry.addLine("dpad down tp stop camera");
-            telemetry.addLine("dpad up to resume camera");
+            if (gainControl != null) {
+                minGain = gainControl.getMinGain();
+                maxGain = gainControl.getMaxGain();
+                gainReady = minGain >= 0 && maxGain >= minGain;
 
+                if (gainReady) {
+                    TEST_GAIN = Math.max(
+                            minGain,
+                            Math.min(maxGain, TEST_GAIN)
+                    );
+
+                    if (!gainControl.setGain(TEST_GAIN)) {
+                        telemetry.addLine("Camera rejected initial gain");
+                    }
+                }
+            }
+
+            telemetry.addLine("Camera ready");
+            telemetry.addData("Exposure control available", exposureReady);
+            telemetry.addData("Gain control available", gainReady);
+            telemetry.addLine("Y: exposure +1 ms | A: exposure -1 ms");
+            telemetry.addLine("B: gain +1 | X: gain -1");
             telemetry.update();
-            //ig this is here so we can save rescources if necessary
-            if (gamepad1.dpad_down) {
-                visionPortal.stopStreaming();
-            }
 
-            if (gamepad1.dpad_up) {
-                visionPortal.resumeStreaming();
-            }
+            waitForStart();
 
-            sleep(20);
+            while (opModeIsActive()) {
+                boolean yPressed = gamepad1.y;
+                boolean aPressed = gamepad1.a;
+                boolean bPressed = gamepad1.b;
+                boolean xPressed = gamepad1.x;
+                boolean downPressed = gamepad1.dpad_down;
+                boolean upPressed = gamepad1.dpad_up;
+
+                boolean streaming = visionPortal.getCameraState()
+                        == VisionPortal.CameraState.STREAMING;
+
+                if (exposureReady && streaming) {
+                    int exposureChange = 0;
+
+                    if (yPressed && !previousY) {
+                        exposureChange++;
+                    }
+
+                    if (aPressed && !previousA) {
+                        exposureChange--;
+                    }
+
+                    if (exposureChange != 0) {
+                        long requestedExposure = Math.max(
+                                minExposure,
+                                Math.min(maxExposure, TEST_EXPOSURE + exposureChange)
+                        );
+
+                        if (exposureControl.setExposure(
+                                requestedExposure,
+                                TimeUnit.MILLISECONDS
+                        )) {
+                            TEST_EXPOSURE = (int) requestedExposure;
+                        } else {
+                            telemetry.addLine("Camera rejected exposure change");
+                        }
+                    }
+
+                    telemetry.addData(
+                            "Actual exposure",
+                            "%d ms",
+                            exposureControl.getExposure(TimeUnit.MILLISECONDS)
+                    );
+                }
+
+                if (gainReady && streaming) {
+                    int gainChange = 0;
+
+                    if (bPressed && !previousB) {
+                        gainChange++;
+                    }
+
+                    if (xPressed && !previousX) {
+                        gainChange--;
+                    }
+
+                    if (gainChange != 0) {
+                        int requestedGain = Math.max(
+                                minGain,
+                                Math.min(maxGain, TEST_GAIN + gainChange)
+                        );
+
+                        if (gainControl.setGain(requestedGain)) {
+                            TEST_GAIN = requestedGain;
+                        } else {
+                            telemetry.addLine("Camera rejected gain change");
+                        }
+                    }
+
+                    telemetry.addData("Actual gain", gainControl.getGain());
+                }
+
+                previousY = yPressed;
+                previousA = aPressed;
+                previousB = bPressed;
+                previousX = xPressed;
+
+                telemetry.addData("Requested exposure", "%d ms", TEST_EXPOSURE);
+                telemetry.addData("Requested gain", TEST_GAIN);
+                telemetry.addData("Exposure control available", exposureReady);
+                telemetry.addData("Gain control available", gainReady);
+
+                List<AprilTagDetection> detections = aprilTag.getDetections();
+
+                telemetry.addData("Total detections", detections.size());
+
+                int singleCount = 0;
+                int clusterCount = 0;
+                double CameraAngle = 1.203;
+
+                for (AprilTagDetection detection : detections) {
+                    if (detection instanceof AprilTagSingleDetection) {
+                        singleCount++;
+
+                        AprilTagSingleDetection single =
+                                (AprilTagSingleDetection) detection;
+
+                        telemetry.addLine();
+                        telemetry.addLine("only one tag...");
+                        telemetry.addData("ID", single.id);
+
+                        if (single.metadata != null && single.ftcPose != null) {
+                            telemetry.addData("Name", single.metadata.name);
+
+                            telemetry.addData(
+                                    "Position (X,Y,Z)",
+                                    "%.1f , %.1f , %.1f in",
+                                    single.ftcPose.x,
+                                    single.ftcPose.y,
+                                    single.ftcPose.z
+                            );
+
+                            telemetry.addData(
+                                    "Range",
+                                    "%.1f in",
+                                    single.ftcPose.range
+                            );
+
+                            telemetry.addData(
+                                    "Bearing",
+                                    "%.1f deg",
+                                    single.ftcPose.bearing
+                            );
+
+                            telemetry.addData(
+                                    "Yaw",
+                                    "%.1f deg",
+                                    single.ftcPose.yaw
+                            );
+                        } else {
+                            telemetry.addData(
+                                    "Name",
+                                    single.metadata != null
+                                            ? single.metadata.name
+                                            : "Idk this tag"
+                            );
+
+                            telemetry.addData(
+                                    "Center",
+                                    "%.0f / %.0f px",
+                                    single.center.x,
+                                    single.center.y
+                            );
+                        }
+                    } else if (detection instanceof AprilTagClusterDetection) {
+                        clusterCount++;
+
+                        AprilTagClusterDetection cluster =
+                                (AprilTagClusterDetection) detection;
+
+                        telemetry.addLine();
+                        telemetry.addLine("CLUSTER");
+
+                        if (cluster.metadata != null) {
+                            telemetry.addData("Cluster", cluster.metadata.name);
+                        }
+
+                        telemetry.addData(
+                                "Tags Found",
+                                "%d%%",
+                                cluster.percentClusterFound
+                        );
+
+                        if (cluster.ftcPose != null) {
+                            double A = Math.atan2(
+                                    cluster.ftcPose.z,
+                                    cluster.ftcPose.y
+                            );
+
+                            double B = CameraAngle - A;
+
+                            double H = Math.hypot(
+                                    cluster.ftcPose.z,
+                                    cluster.ftcPose.y
+                            );
+
+                            double f = Math.cos(B) * H;
+                            double up = Math.tan(B) * f;
+
+                            telemetry.addData(
+                                    "A,B,H",
+                                    "%8.2f %8.2f %8.2f",
+                                    A, B, H
+                            );
+
+                            telemetry.addData(
+                                    "Position (X,Y,Z)",
+                                    "%.1f , %.1f , %.1f in",
+                                    cluster.ftcPose.x,
+                                    cluster.ftcPose.y,
+                                    cluster.ftcPose.z
+                            );
+
+                            telemetry.addData(
+                                    "Forward Distance",
+                                    "%.1f in",
+                                    f
+                            );
+
+                            telemetry.addData(
+                                    "Upward Distance",
+                                    "%.1f in",
+                                    up
+                            );
+
+                            telemetry.addData(
+                                    "Range",
+                                    "%.1f in",
+                                    cluster.ftcPose.range
+                            );
+
+                            telemetry.addData(
+                                    "Bearing",
+                                    "%.1f deg",
+                                    cluster.ftcPose.bearing
+                            );
+
+                            telemetry.addData(
+                                    "Pitch",
+                                    "%.1f deg",
+                                    cluster.ftcPose.pitch
+                            );
+
+                            telemetry.addData(
+                                    "Yaw",
+                                    "%.1f deg",
+                                    cluster.ftcPose.yaw
+                            );
+
+                            telemetry.addData(
+                                    "Roll",
+                                    "%.1f deg",
+                                    cluster.ftcPose.roll
+                            );
+                        } else {
+                            telemetry.addLine("Cluster pose unavailable");
+                        }
+                    }
+                }
+
+                telemetry.addLine();
+                telemetry.addData("Single Tags", singleCount);
+                telemetry.addData("Clusters", clusterCount);
+                telemetry.addLine("Y: exposure +1 ms | A: exposure -1 ms");
+                telemetry.addLine("B: gain +1 | X: gain -1");
+                telemetry.addLine("dpad down to stop camera");
+                telemetry.addLine("dpad up to resume camera");
+                telemetry.update();
+
+                if (downPressed && !previousDown) {
+                    visionPortal.stopStreaming();
+                } else if (upPressed && !previousUp) {
+                    visionPortal.resumeStreaming();
+                }
+
+                previousDown = downPressed;
+                previousUp = upPressed;
+
+                sleep(20);
+            }
+        } finally {
+            visionPortal.close();
         }
-
-        visionPortal.close();
     }
-    //set up the cameras
+
     private void initAprilTag() {
-        //create the april tag processor
         aprilTag = new AprilTagProcessor.Builder()
                 .setLensIntrinsics(358.215, 358.215, 449.09, 352.672)
                 .build();
-        //start camera
-        //idk if there is a hardware thing already so it is just here
+
         visionPortal = new VisionPortal.Builder()
                 .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
                 .setCameraResolution(new Size(960, 720))
