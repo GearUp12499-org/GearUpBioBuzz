@@ -321,6 +321,11 @@ public class ApriltagExposureGainTuning extends LinearOpMode {
                             );
 
                             telemetry.addData(
+                                    "CameraAngle",
+                                    CameraAngle
+                            );
+
+                            telemetry.addData(
                                     "Position (X,Y,Z)",
                                     "%.1f , %.1f , %.1f in",
                                     cluster.ftcPose.x,
