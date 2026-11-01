@@ -30,18 +30,19 @@ public class SimpleExposureandGainTest extends LinearOpMode {
         }
 
 //makes the camera use our set values
-        ExposureControl exposureControl = visionPortal.getCameraControl(ExposureControl.class);
-        if (exposureControl != null) {
-            exposureControl.setMode(ExposureControl.Mode.Manual);
-            exposureControl.setExposure(TEST_EXPOSURE, TimeUnit.MILLISECONDS);
-        }
-
-        GainControl gainControl = visionPortal.getCameraControl(GainControl.class);
-        if (gainControl != null) {
-            gainControl.setGain(TEST_GAIN);
-        }
+//        ExposureControl exposureControl = visionPortal.getCameraControl(ExposureControl.class);
+//        if (exposureControl != null) {
+//            exposureControl.setMode(ExposureControl.Mode.Manual);
+//            exposureControl.setExposure(TEST_EXPOSURE, TimeUnit.MILLISECONDS);
+//        }
+//
+//        GainControl gainControl = visionPortal.getCameraControl(GainControl.class);
+//        if (gainControl != null) {
+//            gainControl.setGain(TEST_GAIN);
+//        }
 
         //let us know when it is ready
+        telemetry.addData("streaming accomplished", 1);
         telemetry.addData("", "Values applied");
         telemetry.update();
 
