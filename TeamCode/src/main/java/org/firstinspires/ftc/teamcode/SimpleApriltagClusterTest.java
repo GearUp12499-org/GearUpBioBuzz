@@ -223,7 +223,7 @@ public class SimpleApriltagClusterTest extends LinearOpMode {
 
                 int singleCount = 0;
                 int clusterCount = 0;
-                double CameraAngle = 1.203;
+                double CameraAngle = Math.toRadians(49);
 
                 for (AprilTagDetection detection : detections) {
                     if (detection instanceof AprilTagSingleDetection) {
@@ -304,7 +304,7 @@ public class SimpleApriltagClusterTest extends LinearOpMode {
                                     cluster.ftcPose.y
                             );
 
-                            double B = CameraAngle - A;
+                            double B = CameraAngle + A;
 
                             double H = Math.hypot(
                                     cluster.ftcPose.z,
@@ -402,12 +402,12 @@ public class SimpleApriltagClusterTest extends LinearOpMode {
 
     private void initAprilTag() {
         aprilTag = new AprilTagProcessor.Builder()
-                .setLensIntrinsics(358.215, 358.215, 449.09, 352.672)
+                .setLensIntrinsics(1385.92, 1385.92, 951.9820, 534.084)
                 .build();
 
         visionPortal = new VisionPortal.Builder()
                 .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
-                .setCameraResolution(new Size(960, 720))
+                .setCameraResolution(new Size(1920, 1080))
                 .enableLiveView(true)
                 .addProcessor(aprilTag)
                 .build();
