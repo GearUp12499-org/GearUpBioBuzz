@@ -42,6 +42,7 @@ public class SimpleExposureandGainTest extends LinearOpMode {
 //        }
 
         //let us know when it is ready
+        telemetry.addData("streaming accomplished", 1);
         telemetry.addData("", "Values applied");
         telemetry.update();
 
