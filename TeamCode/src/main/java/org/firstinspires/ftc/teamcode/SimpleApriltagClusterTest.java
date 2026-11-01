@@ -223,7 +223,7 @@ public class SimpleApriltagClusterTest extends LinearOpMode {
 
                 int singleCount = 0;
                 int clusterCount = 0;
-                double CameraAngle = 1.203;
+                double CameraAngle = Math.toRadians(29.5);
 
                 for (AprilTagDetection detection : detections) {
                     if (detection instanceof AprilTagSingleDetection) {
