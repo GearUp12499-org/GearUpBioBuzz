@@ -17,8 +17,8 @@ class TestShoot: LinearOpMode() {
         var vel = 1000.0
 
         while (opModeIsActive()){
-//            hardware.setShooterVel(vel)
-            hardware.shooter.setPower(0.3)
+            hardware.setShooterVel(vel)
+//            hardware.shooter.setPower(0.3)
 
             if (gamepad1.x) {
                 vel -= 20
@@ -29,6 +29,7 @@ class TestShoot: LinearOpMode() {
             }
 
             telemetry.addData("setVel", vel)
+            telemetry.addData("power", hardware.shooter.power)
             telemetry.addData("actualVel", hardware.shooter.getVelocity())
             telemetry.update()
         }
