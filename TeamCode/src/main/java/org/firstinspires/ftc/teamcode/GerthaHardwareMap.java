@@ -14,6 +14,7 @@ import org.firstinspires.ftc.teamcode.hardware.ZeroPower;
 public class GerthaHardwareMap extends HardwareMapper {
 
     @HardwareName("frontRight")
+    @Reversed
     @ZeroPower(DcMotor.ZeroPowerBehavior.BRAKE)
     public DcMotorEx frontRight;
 
@@ -23,12 +24,10 @@ public class GerthaHardwareMap extends HardwareMapper {
     public DcMotorEx backRight;
 
     @HardwareName("frontLeft")
-    @Reversed
     @ZeroPower(DcMotor.ZeroPowerBehavior.BRAKE)
     public DcMotorEx frontLeft;
 
     @HardwareName("backLeft")
-    @Reversed
     @ZeroPower(DcMotor.ZeroPowerBehavior.BRAKE)
     public DcMotorEx backLeft;
 
