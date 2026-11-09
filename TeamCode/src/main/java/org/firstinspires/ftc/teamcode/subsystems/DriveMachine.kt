@@ -15,6 +15,8 @@ class DriveMachine(private val hw: GerthaHardwareMap) {
 
     lateinit var state: State
 
+    val removerImpl = REmoverImpl()
+
     fun init() {
         state = State.FIELD_CENTRIC
     }
@@ -23,7 +25,7 @@ class DriveMachine(private val hw: GerthaHardwareMap) {
 
         when (state) {
             State.FIELD_CENTRIC -> {
-                val angle = -(robotState.ppThetaRad - Math.PI/2)
+                val angle = -(robotState.ppThetaRad + Math.PI/2)
 
                 var rotX = input.jx1 * cos(angle) - input.jy1 * sin(angle)
                 val rotY = input.jx1 * sin(angle) + input.jy1 * cos(angle)
@@ -42,7 +44,16 @@ class DriveMachine(private val hw: GerthaHardwareMap) {
                 hw.backRight.power = backRightPower
             }
             State.PID2POINT -> {
-
+                removerImpl.tick(
+                    robotState.ppX,
+                    robotState.ppY,
+                    robotState.ppThetaRad,
+                    robotState.velXInch,
+                    robotState.velYInch,
+                    robotState.angVelRad,
+                    robotState.velInch,
+                    hw
+                )
             }
         }
     }
