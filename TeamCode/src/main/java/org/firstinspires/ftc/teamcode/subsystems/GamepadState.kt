@@ -17,8 +17,11 @@ class GamepadState(private val gp1: Gamepad, private val gp2: Gamepad) {
     var rb1 = false
     var wasrb1 = false
 
+    //cycle bar
     var rt1 = false
     var wasrt1 = false
+
+
 
     fun update() {
         jx1 = gp1.left_stick_x.toDouble()
