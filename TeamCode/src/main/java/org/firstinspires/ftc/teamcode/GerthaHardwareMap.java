@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import static java.lang.Math.PI;
 import static java.lang.Math.abs;
 
+import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -17,9 +18,10 @@ import org.firstinspires.ftc.teamcode.hardware.ZeroPower;
 
 public class GerthaHardwareMap extends HardwareMapper {
 
-    public static final double POLLEN_UP = 0.1;
-    public static final double POLLEN_ONLY = 0.49;
-    public static final double POLLEN_EXTRACT = 0.54;
+    public static final double POLLEN_UP = 0.15;
+    public static final double POLLEN_ONLY = 0.53;
+    public static final double POLLEN_EXTRACT = 0.57;
+    public static final double DISTANCE_THRESHOLD = 4.0;
 
     @HardwareName("frontRight")
     @ZeroPower(DcMotor.ZeroPowerBehavior.BRAKE)
@@ -39,11 +41,24 @@ public class GerthaHardwareMap extends HardwareMapper {
     @ZeroPower(DcMotor.ZeroPowerBehavior.BRAKE)
     public DcMotorEx backLeft;
 
+    @HardwareName("leftIntake")
+    public DcMotor leftIntake;
+
+    @HardwareName("rightIntake")
+    @Reversed
+    public DcMotor rightIntake;
+
     @HardwareName("pinpoint")
     public GoBildaPinpoint2Driver pinpoint;
 
-    @HardwareName("pFlip")
-    public Servo pFlip;
+    @HardwareName("rightRamp")
+    public Servo rightRamp;
+
+    @HardwareName("leftRamp")
+    public Servo leftRamp;
+
+    @HardwareName("color")
+    public RevColorSensorV3 color;
 
     public GerthaHardwareMap(HardwareMap map) {
         super(map);
@@ -72,4 +87,15 @@ public class GerthaHardwareMap extends HardwareMapper {
         }
         return diff;
     }
+
+    public void setIntakePower(double power){
+        leftIntake.setPower(power);
+        rightIntake.setPower(power);
+    }
+
+    public void setPollenExtractor(double pos) {
+        rightRamp.setPosition(pos);
+        leftRamp.setPosition(1.03 - pos);
+    }
+
 }

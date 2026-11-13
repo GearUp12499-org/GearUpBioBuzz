@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.org.firstinspires.ftc.teamcode.subsystems
 
+import com.qualcomm.hardware.lynx.LynxModule
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D
