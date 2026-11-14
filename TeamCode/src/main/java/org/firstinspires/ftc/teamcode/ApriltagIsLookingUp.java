@@ -25,7 +25,6 @@ public class ApriltagIsLookingUp extends LinearOpMode {
     @Override
     public void runOpMode() {
         initAprilTag();
-
         telemetry.addLine("Camera initialized");
         telemetry.update();
 
@@ -34,11 +33,9 @@ public class ApriltagIsLookingUp extends LinearOpMode {
         while (opModeIsActive()) {
             telemetryAprilTag();
             telemetry.update();
-            sleep(20);
-        }
+            sleep(20);}
 
-        if (visionPortal != null) {
-            visionPortal.close();
+        if (visionPortal != null) {visionPortal.close();
         }
     }
 
@@ -52,26 +49,20 @@ public class ApriltagIsLookingUp extends LinearOpMode {
             );
         } else {
             visionPortal = VisionPortal.easyCreateWithDefaults(
-                    BuiltinCameraDirection.BACK,
-                    aprilTag
-            );
+                    BuiltinCameraDirection.BACK, aprilTag);
         }
     }
 
 
     private void telemetryAprilTag() {
         List<AprilTagDetection> currentDetections = aprilTag.getDetections();
-
         boolean clusterFound = false;
 
         for (AprilTagDetection detection : currentDetections) {
-            if (detection instanceof AprilTagClusterDetection
-                    && detection.ftcPose != null) {
-
+            if (detection instanceof AprilTagClusterDetection && detection.ftcPose != null) {
                 clusterFound = true;
 
-                AprilTagClusterDetection clusterDet =
-                        (AprilTagClusterDetection) detection;
+                AprilTagClusterDetection clusterDet = (AprilTagClusterDetection) detection;
 
                 telemetry.addLine("\n==== Tag Cluster");
                 telemetry.addData("Percent tags found",
@@ -80,21 +71,44 @@ public class ApriltagIsLookingUp extends LinearOpMode {
                 telemetry.addLine(String.format("XYZ %.1f %.1f %.1f", detection.ftcPose.x, detection.ftcPose.y, detection.ftcPose.z));
 
                 double roll = detection.ftcPose.roll;
-                telemetry.addData("Roll", roll);
+                double pitch = detection.ftcPose.pitch;
+                double yaw = detection.ftcPose.yaw;
 
-                if (Math.abs(roll) < 90) {
-                    telemetry.addLine("audience side up");
+                String clusterName = clusterDet.metadata.name;
+
+                telemetry.addData("Cluster Name", clusterName);
+                telemetry.addData("Roll", roll);
+                telemetry.addData("Pitch", pitch);
+                telemetry.addData("Yaw", yaw);
+
+                boolean isAudienceCluster = clusterName.toLowerCase().contains("audience");
+
+                boolean isScoringCluster = clusterName.toLowerCase().contains("scoring");
+
+                boolean inverted = Math.abs(roll) > 90;
+                double correctedPitch = inverted ? -pitch : pitch;
+
+                telemetry.addData("Inverted", inverted);
+                telemetry.addData("Corrected Pitch", correctedPitch);
+
+                if (isAudienceCluster) {
+                    if (correctedPitch < 0) {
+                        telemetry.addLine("audience side up");
+                    } else {
+                        telemetry.addLine("scoring side up");}
+                } else if (isScoringCluster) {
+                    if (pitch > 0) {
+                        telemetry.addLine("arudience side up");
+                    } else {
+                        telemetry.addLine("scoring side up");}
                 } else {
-                    telemetry.addLine("scoring side up");
-                }
+                    telemetry.addLine("Unknown cluster");}
             }
         }
 
         if (!clusterFound) {
-            for (AprilTagDetection detection : currentDetections) {
-                if (detection instanceof AprilTagSingleDetection) {
-                    AprilTagSingleDetection singleDet =
-                            (AprilTagSingleDetection) detection;
+            for (AprilTagDetection detection : currentDetections) { if (detection instanceof AprilTagSingleDetection) {
+                    AprilTagSingleDetection singleDet = (AprilTagSingleDetection) detection;
 
                     if (singleDet.ftcPose != null) {
                         telemetry.addLine(String.format("\n==== Tag ID %d", singleDet.id));
@@ -105,15 +119,13 @@ public class ApriltagIsLookingUp extends LinearOpMode {
                         if (Math.abs(roll) < 90) {
                             telemetry.addLine("audience side up");
                         } else {
-                            telemetry.addLine("scoring side up");
-                        }
+                            telemetry.addLine("scoring side up");}
                     }
                 }
             }
         }
 
         if (currentDetections.isEmpty()) {
-            telemetry.addLine("No AprilTags detected");
-        }
+            telemetry.addLine("No AprilTags detected");}
     }
 }
