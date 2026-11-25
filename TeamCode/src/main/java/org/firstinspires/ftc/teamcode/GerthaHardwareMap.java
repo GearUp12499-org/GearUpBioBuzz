@@ -14,11 +14,13 @@ import com.qualcomm.robotcore.hardware.VoltageSensor;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.drivers.GoBildaPinpoint2Driver;
+import org.firstinspires.ftc.teamcode.hardware.EncoderFor;
 import org.firstinspires.ftc.teamcode.hardware.HardwareMapper;
 import org.firstinspires.ftc.teamcode.hardware.HardwareName;
 import org.firstinspires.ftc.teamcode.hardware.Reversed;
 import org.firstinspires.ftc.teamcode.hardware.RobotPose;
 import org.firstinspires.ftc.teamcode.hardware.ZeroPower;
+import org.firstinspires.ftc.teamcode.org.firstinspires.ftc.teamcode.hardware.Encoder;
 import org.firstinspires.ftc.teamcode.org.firstinspires.ftc.teamcode.hardware.PoseSet;
 import org.firstinspires.ftc.teamcode.org.firstinspires.ftc.teamcode.subsystems.RobotState;
 
@@ -90,6 +92,9 @@ public class GerthaHardwareMap extends HardwareMapper {
 
     @HardwareName("Webcam 1")
     public WebcamName webcam1;
+
+    @EncoderFor("rightIntake")
+    public Encoder pollenTurretEncoder;
 
     public GerthaHardwareMap(HardwareMap map) {
         super(map);
