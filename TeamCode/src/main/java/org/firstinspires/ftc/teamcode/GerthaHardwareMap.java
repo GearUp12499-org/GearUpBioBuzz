@@ -4,6 +4,7 @@ import static java.lang.Math.PI;
 import static java.lang.Math.abs;
 
 import com.qualcomm.hardware.rev.RevColorSensorV3;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -88,7 +89,7 @@ public class GerthaHardwareMap extends HardwareMapper {
     public VoltageSensor voltageSensor;
 
     @HardwareName("pollenTurretServo")
-    public Servo pollenTurret;
+    public CRServo pollenTurret;
 
     @HardwareName("Webcam 1")
     public WebcamName webcam1;

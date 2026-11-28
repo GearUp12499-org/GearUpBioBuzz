@@ -8,7 +8,7 @@ import org.firstinspires.ftc.teamcode.GerthaHardwareMap.*
 import org.firstinspires.ftc.teamcode.ShooterImpl
 import org.firstinspires.ftc.teamcode.hardware.RobotPose
 import org.firstinspires.ftc.teamcode.org.firstinspires.ftc.teamcode.hardware.PoseSet
-import org.firstinspires.ftc.teamcode.org.firstinspires.ftc.teamcode.subsystems.AimingMachine
+//import org.firstinspires.ftc.teamcode.org.firstinspires.ftc.teamcode.subsystems.AimingMachine
 import org.firstinspires.ftc.teamcode.org.firstinspires.ftc.teamcode.subsystems.DriveMachine
 import org.firstinspires.ftc.teamcode.org.firstinspires.ftc.teamcode.subsystems.GamepadState
 import org.firstinspires.ftc.teamcode.org.firstinspires.ftc.teamcode.subsystems.IntakeShootMachine
@@ -106,7 +106,7 @@ abstract class LinearAuto(private val isRed: Boolean) : LinearOpMode() {
         val driveMachine = DriveMachine(hw)
         val intakeShootMachine = IntakeShootMachine(hw, isAuto = true)
         val rampMachine = RampMachine(hw)
-        val aimingMachine = AimingMachine(hw, poseSet)
+//        val aimingMachine = AimingMachine(hw, poseSet)
         //aim
 
         //prep to bulk read
@@ -118,7 +118,7 @@ abstract class LinearAuto(private val isRed: Boolean) : LinearOpMode() {
         driveMachine.init(robotState)
         intakeShootMachine.init()
         rampMachine.init()
-        aimingMachine.init()
+//        aimingMachine.init()
 
         //remover roll to starting pose
         while(opModeInInit()){
@@ -130,8 +130,8 @@ abstract class LinearAuto(private val isRed: Boolean) : LinearOpMode() {
         }
 
         waitForStart()
-        aimingMachine.state = AimingMachine.State.AUTO
-        aimingMachine.setHardcode(AUTO_SHOOT_SPEED)
+//        aimingMachine.state = AimingMachine.State.AUTO
+//        aimingMachine.setHardcode(AUTO_SHOOT_SPEED)
         driveMachine.state = DriveMachine.State.PID2POINT
         driveMachine.removerImpl.init(
             robotState.ppRobotPose,
@@ -482,7 +482,7 @@ abstract class LinearAuto(private val isRed: Boolean) : LinearOpMode() {
             driveMachine.update(robotState, gamepadState)
             intakeShootMachine.update(robotState, gamepadState)
             rampMachine.update(gamepadState)
-            aimingMachine.update(robotState,gamepadState)
+//            aimingMachine.update(robotState,gamepadState)
 
             telemetry.addData("targetx", driveMachine.removerImpl.target.x)
             telemetry.addData("targety", driveMachine.removerImpl.target.y)
