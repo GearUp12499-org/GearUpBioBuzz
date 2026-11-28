@@ -4,8 +4,11 @@ import android.util.Log
 import org.firstinspires.ftc.teamcode.GerthaHardwareMap
 import org.firstinspires.ftc.teamcode.GerthaHardwareMap.*
 import org.firstinspires.ftc.teamcode.ShooterImpl
+import org.firstinspires.ftc.teamcode.hardware.RobotPose
 import org.firstinspires.ftc.teamcode.org.firstinspires.ftc.teamcode.hardware.PoseSet
+import kotlin.math.PI
 import kotlin.math.abs
+import kotlin.math.atan2
 import kotlin.math.tan
 
 class AimingMachine(private val hw: GerthaHardwareMap, private val poseSet: PoseSet) {
@@ -26,7 +29,9 @@ class AimingMachine(private val hw: GerthaHardwareMap, private val poseSet: Pose
     var justTransitioned = true
 
     val shooterImpl = ShooterImpl(hw)
-    val turretImpl = TurretImpl(hw, poseSet)
+    val turretImplPID = TurretImplPID(hw)
+
+    var targetPose = poseSet.LEFT_HIVE_AT
 
     var constantVel = 0.0
 
@@ -37,11 +42,18 @@ class AimingMachine(private val hw: GerthaHardwareMap, private val poseSet: Pose
     fun init() {
         state = State.FULL
         prevState = State.FULL
-        turretImpl.targetPose = poseSet.LEFT_HIVE_AT
+        targetPose = poseSet.LEFT_HIVE_AT
         shooterImpl.setTarget(AUTO_SHOOT_SPEED)
     }
 
     fun update (robotState: RobotState, input: GamepadState) {
+
+        if (robotState.rightHive) {
+            targetPose = poseSet.RIGHT_HIVE_AT.copy()
+        }
+        else {
+            targetPose = poseSet.LEFT_HIVE_AT.copy()
+        }
 
         justTransitioned = prevState != state
         prevState = state
@@ -70,10 +82,13 @@ class AimingMachine(private val hw: GerthaHardwareMap, private val poseSet: Pose
         Log.i("bottom", bottom.toString())
         Log.i("Target", velShooter.toString())
 
+        val targetDeg = getTargetFromPinpoint(robotState.ppRobotPose)
+
         when (state) {
             State.FULL -> {
-                turretImpl.update(robotState)
+//                turretImpl.update(robotState)
                 shooterImpl.setTarget(velShooter)
+                turretImplPID.update(targetDeg)
                 shooterImpl.tickShooter()
 
                 if (input.start2) {
@@ -83,10 +98,11 @@ class AimingMachine(private val hw: GerthaHardwareMap, private val poseSet: Pose
 
             State.NO_TURRET -> {
                 if (justTransitioned) {
-                    turretImpl.setToZero()
+//                    turretImpl.setToZero()
                 }
                 shooterImpl.setTarget(velShooter)
                 shooterImpl.tickShooter()
+                turretImplPID.update(0.0)
 
                 if (input.start2) {
                     state = State.NO_NOTHING
@@ -94,10 +110,11 @@ class AimingMachine(private val hw: GerthaHardwareMap, private val poseSet: Pose
             }
             State.NO_NOTHING -> {
                 if (justTransitioned) {
-                    turretImpl.setToZero()
+//                    turretImpl.setToZero()
                 }
                 shooterImpl.setTarget(AUTO_SHOOT_SPEED)
                 shooterImpl.tickShooter()
+                turretImplPID.update(0.0)
 
                 if (input.start2) {
                     state = State.TURRET_NO_SHOOTER
@@ -105,11 +122,12 @@ class AimingMachine(private val hw: GerthaHardwareMap, private val poseSet: Pose
             }
             State.AUTO -> {
                 if (justTransitioned) {
-                    turretImpl.setToZero()
+//                    turretImpl.setToZero()
                 }
 //                turretImpl.update(robotState)
                 shooterImpl.setTarget(constantVel)
                 shooterImpl.tickShooter()
+                turretImplPID.update(targetDeg)
 //                if (robotState.ppX > 0) {
 //                    turretImpl.setDegrees(15.0)
 //                }
@@ -121,9 +139,10 @@ class AimingMachine(private val hw: GerthaHardwareMap, private val poseSet: Pose
                 if (justTransitioned){
 
                 }
-                turretImpl.update(robotState)
+//                turretImpl.update(robotState)
                 shooterImpl.setTarget(AUTO_SHOOT_SPEED)
                 shooterImpl.tickShooter()
+                turretImplPID.update(targetDeg)
 
 
                 if (input.start2) {
@@ -131,5 +150,23 @@ class AimingMachine(private val hw: GerthaHardwareMap, private val poseSet: Pose
                 }
             }
         }
+    }
+
+    private fun toDeg(radians: Double): Double {
+        return 180 * radians / PI
+    }
+
+    private fun getTargetFromPinpoint(currentPose: RobotPose): Double {
+        val x = targetPose.x - (currentPose.x)
+        val y = targetPose.y - (currentPose.y)
+        val robotAngle = toDeg(currentPose.a)
+        val goalAngle = toDeg(atan2(y, x))
+
+        var targetAngle = (180 + goalAngle - robotAngle)
+
+        while (targetAngle >= 180.0) targetAngle -= 360.0
+        while (targetAngle < -180.0) targetAngle += 360.0
+
+        return(targetAngle)
     }
 }

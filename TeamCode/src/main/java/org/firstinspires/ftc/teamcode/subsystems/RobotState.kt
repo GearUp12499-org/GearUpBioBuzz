@@ -46,6 +46,7 @@ class RobotState(private val hw: GerthaHardwareMap, val isRed: Boolean = true, v
     var blue = 0
     var green = 0
 
+
     fun init(ppStartPose: RobotPose){
 //        hw.pinpoint.resetPosAndIMU()
         hw.pinpoint.position = ppStartPose.asPose2D
@@ -55,6 +56,7 @@ class RobotState(private val hw: GerthaHardwareMap, val isRed: Boolean = true, v
         ppThetaRad = ppPose.getHeading(AngleUnit.RADIANS)
         ppThetaDeg = ppPose.getHeading(AngleUnit.DEGREES)
         ppRobotPose = RobotPose(ppX, ppY, ppThetaRad)
+        hw.pollenTurretEncoder.reset()
     }
 
     fun update() {
@@ -108,6 +110,7 @@ class RobotState(private val hw: GerthaHardwareMap, val isRed: Boolean = true, v
                     if (inverted) {
                         pitch = -pitch
                     }
+
 
                     //pitch<0 means that cluster is up
                     //pitch<0 means that cluster is down

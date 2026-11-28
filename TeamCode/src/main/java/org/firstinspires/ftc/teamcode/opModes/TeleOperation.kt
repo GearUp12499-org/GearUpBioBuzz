@@ -12,7 +12,6 @@ import org.firstinspires.ftc.teamcode.org.firstinspires.ftc.teamcode.subsystems.
 import org.firstinspires.ftc.teamcode.org.firstinspires.ftc.teamcode.subsystems.IntakeShootMachine
 import org.firstinspires.ftc.teamcode.org.firstinspires.ftc.teamcode.subsystems.RampMachine
 import org.firstinspires.ftc.teamcode.org.firstinspires.ftc.teamcode.subsystems.RobotState
-import org.firstinspires.ftc.teamcode.org.firstinspires.ftc.teamcode.subsystems.TurretImpl
 import org.firstinspires.ftc.teamcode.org.firstinspires.ftc.teamcode.utils.StaticStore
 import kotlin.time.Duration.Companion.seconds
 
